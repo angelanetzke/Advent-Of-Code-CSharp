@@ -6,6 +6,9 @@
 # Ignore input
 *.txt
 
+# Ignore sln files
+*.sln
+
 # User-specific files
 *.rsuser
 *.suo
