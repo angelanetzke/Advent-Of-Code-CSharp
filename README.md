@@ -19,7 +19,7 @@ IDE: VS Code
 
 2019  
 Started: November 2022  
-IDE: Visual Studio  
+IDE: Visual Studio (Day 1 - 13) VS Code (Day 14 and following)  
 .Net Version: 6.0  
 
 2020  
