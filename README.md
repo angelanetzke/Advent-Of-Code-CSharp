@@ -36,3 +36,8 @@ IDE: Visual Studio
 Started: December 2022  
 IDE: VS Code  
 .Net Version: 6.0  
+
+2023  
+Started: December 2023  
+IDE: VS Code  
+.Net Version: 8.0  
