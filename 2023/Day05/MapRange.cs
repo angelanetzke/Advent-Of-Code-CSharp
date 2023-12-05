@@ -26,7 +26,9 @@ internal class MapRange : IComparable<MapRange>
 	{
 		if (range.Min < oldMin )
 		{
-			return new ValueRange(range.Min, Math.Min(range.Max, oldMin - 1) - range.Min + 1);
+			long newMin = range.Min;
+			long newSize = Math.Min(range.Max, oldMin - 1) - newMin + 1;
+			return new ValueRange(newMin, newSize);
 		}
 		return null;
 	}
@@ -46,8 +48,9 @@ internal class MapRange : IComparable<MapRange>
 	{
 		if (range.Max > oldMin + size - 1)
 		{
-			return new ValueRange(
-				Math.Max(range.Min, oldMin + size), range.Max - Math.Max(range.Min, oldMin + size) + 1);
+			long newMin = Math.Max(range.Min, oldMin + size);
+			long newSize = range.Max - newMin + 1;
+			return new ValueRange(newMin, newSize);
 		}
 		return null;
 	}
