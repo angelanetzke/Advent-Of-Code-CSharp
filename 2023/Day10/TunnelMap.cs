@@ -4,7 +4,7 @@ namespace Day10;
 
 internal class TunnelMap
 {
-	private readonly string[] mapData;
+	private readonly List<string> mapData;
 	private readonly (int, int) loopStart;
 	private enum Direction { N, W, S, E };
 	private static readonly (int, int) north = (-1, 0);
@@ -26,7 +26,6 @@ internal class TunnelMap
 		{ ('F', Direction.N), east },
 		{ ('F', Direction.W), south },
 	};
-
 	private readonly Dictionary<(int, int), Direction> offsetToDirection = new ()
 	{
 		{north, Direction.N},
@@ -35,10 +34,11 @@ internal class TunnelMap
 		{east, Direction.E}
 	};
 	private readonly HashSet<(int, int)> loopPositions = [];
-	public TunnelMap(string[] mapData)
+
+	public TunnelMap(string[] mapDataArray)
 	{
-		this.mapData = mapData;
-		for (int row = 0; row < mapData.Length; row++)
+		mapData = mapDataArray.ToList();
+		for (int row = 0; row < mapData.Count; row++)
 		{
 			int column = mapData[row].IndexOf('S');
 			if (column >= 0)
@@ -57,17 +57,17 @@ internal class TunnelMap
 		(int, int) northOfStart = (loopStart.Item1 + north.Item1, loopStart.Item2 + north.Item2);
 		(int, int) westOfStart = (loopStart.Item1 + west.Item1, loopStart.Item2 + west.Item2);
 		(int, int) southOfStart = (loopStart.Item1 + south.Item1, loopStart.Item2 + south.Item2);
-		if (IsInRangeMapData(northOfStart) && CanMove(northOfStart, Direction.N))
+		if (IsInRange(northOfStart, mapData) && CanMove(northOfStart, Direction.N))
 		{
 			currentDirection = Direction.N;
 			currentPosition = (currentPosition.Item1 + north.Item1, currentPosition.Item2 + north.Item2);
 		}
-		else if (IsInRangeMapData(westOfStart) && CanMove(northOfStart, Direction.W))
+		else if (IsInRange(westOfStart, mapData) && CanMove(northOfStart, Direction.W))
 		{
 			currentDirection = Direction.W;
 			currentPosition = (currentPosition.Item1 + west.Item1, currentPosition.Item2 + west.Item2);
 		}
-		else if (IsInRangeMapData(southOfStart) && CanMove(northOfStart, Direction.S))
+		else if (IsInRange(southOfStart, mapData) && CanMove(northOfStart, Direction.S))
 		{
 			currentDirection = Direction.S;
 			currentPosition = (currentPosition.Item1 + south.Item1, currentPosition.Item2 + south.Item2);
@@ -89,20 +89,12 @@ internal class TunnelMap
 		return count / 2;
 	}
 
-	private bool IsInRangeMapData((int, int) position)
+	private static bool IsInRange((int, int) position, List<string> map)
 	{
 		return 0 <= position.Item1
-			&& position.Item1 < mapData.Length
+			&& position.Item1 < map.Count
 			&& 0 <= position.Item2
-			&& position.Item2 < mapData[0].Length;
-	}
-
-	private static bool IsInRangeExplodedMap((int, int) position, List<string> explodedMap)
-	{
-		return 0 <= position.Item1
-			&& position.Item1 < explodedMap.Count
-			&& 0 <= position.Item2
-			&& position.Item2 < explodedMap[0].Length;
+			&& position.Item2 < map[0].Length;
 	}
 
 	private bool CanMove((int, int) moveToPosition, Direction moveDirection)
@@ -133,7 +125,7 @@ internal class TunnelMap
 		StringBuilder builder1 = new ();
 		StringBuilder builder2 = new ();
 		StringBuilder builder3 = new ();
-		for (int row = 0; row < mapData.Length; row++)
+		for (int row = 0; row < mapData.Count; row++)
 		{
 			builder1.Clear();
 			builder2.Clear();
@@ -220,7 +212,7 @@ internal class TunnelMap
 				(int, int) thisNeighbor = (current.Item1 + thisOffset.Item1, current.Item2 + thisOffset.Item2);
 				if (!queue.Contains(thisNeighbor)
 					&& !visited.Contains(thisNeighbor)
-					&& IsInRangeExplodedMap(thisNeighbor, explodedMap)
+					&& IsInRange(thisNeighbor, explodedMap)
 					&& explodedMap[thisNeighbor.Item1][thisNeighbor.Item2] != '#')
 				{
 					queue.Enqueue(thisNeighbor);
