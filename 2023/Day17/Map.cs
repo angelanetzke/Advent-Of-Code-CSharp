@@ -4,7 +4,6 @@ internal class Map
 {
   private readonly Dictionary<(int, int), int> blockValues = [];
   private readonly (int, int) endCoordinates;
-  private readonly HashSet<(int, int, char)> visited = [];
   private static readonly Dictionary<char, char[]> nextDirections = new ()
   {
     {'N', ['W', 'E']},
@@ -32,7 +31,7 @@ internal class Map
     (int, int, char) current = (0, 0, 'X');
     Dictionary<(int, int, char), int> distances = [];
     distances[current] = 0;
-    visited.Clear();
+    HashSet<(int, int, char)> visited = [];
     List<(int, int, char)> queue = [];
     queue.Add(current);
     while (queue.Count > 0)
