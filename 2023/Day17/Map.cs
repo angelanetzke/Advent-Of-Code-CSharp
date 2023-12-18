@@ -2,21 +2,16 @@ namespace Day17;
 
 internal class Map
 {
-  private readonly Dictionary<(int, int), int> blocks = [];
+  private readonly Dictionary<(int, int), int> blockValues = [];
   private readonly (int, int) endCoordinates;
-  private static readonly Dictionary<char, (int, int, char)[]> twoDirections = new ()
+  private readonly HashSet<(int, int, char)> visited = [];
+  private static readonly Dictionary<char, char[]> nextDirections = new ()
   {
-    {'N', [(0, -1, 'W'), (0, 1, 'E')]},
-    {'S', [(0, -1, 'W'), (0, 1, 'E')]},
-    {'W', [(-1, 0, 'N'), (1, 0, 'S')]},
-    {'E', [(-1, 0, 'N'), (1, 0, 'S')]}
-  };
-  private static readonly Dictionary<char, (int, int, char)[]> threeDirections = new ()
-  {
-    {'N', [(0, -1, 'W'), (0, 1, 'E'), (-1, 0, 'N')]},
-    {'S', [(0, -1, 'W'), (0, 1, 'E'), (1, 0, 'S')]},
-    {'W', [(-1, 0, 'N'), (1, 0, 'S'), (0, -1, 'W')]},
-    {'E', [(-1, 0, 'N'), (1, 0, 'S'), (0, 1, 'E')]}    
+    {'N', ['W', 'E']},
+    {'S', ['W', 'E']},
+    {'W', ['N', 'S']},
+    {'E', ['N', 'S']},
+    {'X', ['N', 'S', 'W', 'E']}
   };
 
   public Map(string[] mapData)
@@ -26,86 +21,97 @@ internal class Map
     {
       for (int column = 0; column < mapData[0].Length; column++)
       {
-        blocks[(row, column)] = mapData[row][column] - '0';
+        blockValues[(row, column)] = mapData[row][column] - '0';
       }
     }
   }
 
   public int GetMinHeatLoss()
   {
-    (int, int, int, char) current = (0, 0, 0, 'X');
-    Dictionary<(int, int, int, char), int> distances = [];
+    (int, int, char) current = (0, 0, 'X');
+    Dictionary<(int, int, char), int> distances = [];
     distances[current] = 0;
-    List<(int, int, int, char)> queue = [];
+    visited.Clear();
+    List<(int, int, char)> queue = [];
     queue.Add(current);
-    HashSet<(int, int, int, char)> visited = [];
     while (queue.Count > 0)
     {
-      queue = queue.OrderBy(x => distances[x]).ToList();
-      current = queue[0];
+      int minValue = queue.Select(x => distances[x]).Min();
+      current = queue.Where(x => distances[x] == minValue).First();
       if ((current.Item1, current.Item2) == endCoordinates)
       {
         return distances[current];
       }
       visited.Add(current);
       queue.Remove(current);
-      List<(int, int, int, char)> neighbors = GetNeighbors(current);
-      foreach ((int, int, int, char) thisNeighbor in neighbors)
+      List<((int, int, char),int)> neighbors = GetNeighbors(current, 1);
+      neighbors.AddRange(GetNeighbors(current, 2));
+      neighbors.AddRange(GetNeighbors(current, 3));
+      foreach (((int, int, char), int) thisNeighbor in neighbors)
       {
-        if (!blocks.ContainsKey((thisNeighbor.Item1, thisNeighbor.Item2)))
+        int distanceToNeighbor = distances[current] + thisNeighbor.Item2;
+        if (distances.ContainsKey(thisNeighbor.Item1))
         {
-          continue;
-        }
-        int distanceToNeighbor = distances[current] + blocks[(thisNeighbor.Item1, thisNeighbor.Item2)];
-        if (distances.ContainsKey(thisNeighbor))
-        {
-          distances[thisNeighbor] = Math.Min(distances[thisNeighbor], distanceToNeighbor);
+          distances[thisNeighbor.Item1] 
+            = Math.Min(distances[thisNeighbor.Item1], distanceToNeighbor);
         }
         else
         {
-          distances[thisNeighbor] = distanceToNeighbor;
+          distances[thisNeighbor.Item1] = distanceToNeighbor;
         }
-        if (!visited.Contains(thisNeighbor) && !queue.Contains(thisNeighbor))
+        if (!visited.Contains(thisNeighbor.Item1) && !queue.Contains(thisNeighbor.Item1))
         {
-          queue.Add(thisNeighbor);
+          queue.Add(thisNeighbor.Item1);
         }
       }
     }
     return 0;
   }
 
-  private static List<(int, int, int, char)> GetNeighbors((int, int, int, char) state)
+  private List<((int, int, char), int)> GetNeighbors((int, int, char) state, int skip)
   {
-    List<(int, int, int, char)> neighbors = [];
-    (int, int, char)[] neighborData;
-    if (state.Item4 == 'X')
+    List<((int, int, char), int)> neighbors = [];
+    char[] directions = nextDirections[state.Item3];
+    foreach (char thisDirection in directions)
     {
-      neighborData = [(-1, 0, 'N'), (1, 0, 'S'), (0, -1, 'W') , (0, 1, 'E')];
-    }
-    else if (state.Item3 < 3)
-    {
-      neighborData = threeDirections[state.Item4];
-    }
-    else
-    {
-      neighborData = twoDirections[state.Item4];
-    }
-    foreach ((int, int, char) thisNeighborData in neighborData)
-    {
-      if (state.Item4 == thisNeighborData.Item3)
+      if (thisDirection == 'N' && blockValues.ContainsKey((state.Item1 - skip, state.Item2)))
       {
-        neighbors.Add((state.Item1 + thisNeighborData.Item1, 
-          state.Item2 + thisNeighborData.Item2, 
-          state.Item3 + 1, thisNeighborData.Item3));
+        int sum = 0;
+        for (int i = 1; i <= skip; i++)
+        {
+          sum += blockValues[(state.Item1 - i, state.Item2)];
+        }
+        neighbors.Add(((state.Item1 - skip, state.Item2, 'N'), sum));
       }
-      else
+      if (thisDirection == 'S' && blockValues.ContainsKey((state.Item1 + skip, state.Item2)))
       {
-        neighbors.Add((state.Item1 + thisNeighborData.Item1, 
-          state.Item2 + thisNeighborData.Item2, 
-          1, thisNeighborData.Item3));
+        int sum = 0;
+        for (int i = 1; i <= skip; i++)
+        {
+          sum += blockValues[(state.Item1 + i, state.Item2)];
+        }
+        neighbors.Add(((state.Item1 + skip, state.Item2, 'S'), sum));
+      }
+      if (thisDirection == 'W' && blockValues.ContainsKey((state.Item1, state.Item2 - skip)))
+      {
+        int sum = 0;
+        for (int i = 1; i <= skip; i++)
+        {
+          sum += blockValues[(state.Item1, state.Item2 - i)];
+        }
+        neighbors.Add(((state.Item1, state.Item2 - skip, 'W'), sum));
+      }
+      if (thisDirection == 'E' && blockValues.ContainsKey((state.Item1, state.Item2 + skip)))
+      {
+        int sum = 0;
+        for (int i = 1; i <= skip; i++)
+        {
+          sum += blockValues[(state.Item1, state.Item2 + i)];
+        }
+        neighbors.Add(((state.Item1, state.Item2 + skip, 'E'), sum));
       }
     }
     return neighbors;
-  }
+  }  
 
 }
