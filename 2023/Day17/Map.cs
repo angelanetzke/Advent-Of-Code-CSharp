@@ -26,8 +26,9 @@ internal class Map
     }
   }
 
-  public int GetMinHeatLoss()
+  public int GetMinHeatLoss(int minMoves, int maxMoves)
   {
+    List<((int, int, char),int)> neighbors = [];
     (int, int, char) current = (0, 0, 'X');
     Dictionary<(int, int, char), int> distances = [];
     distances[current] = 0;
@@ -44,9 +45,11 @@ internal class Map
       }
       visited.Add(current);
       queue.Remove(current);
-      List<((int, int, char),int)> neighbors = GetNeighbors(current, 1);
-      neighbors.AddRange(GetNeighbors(current, 2));
-      neighbors.AddRange(GetNeighbors(current, 3));
+      neighbors.Clear();
+      for (int skip = minMoves; skip <= maxMoves; skip++)
+      {
+        neighbors.AddRange(GetNeighbors(current, skip));
+      }
       foreach (((int, int, char), int) thisNeighbor in neighbors)
       {
         int distanceToNeighbor = distances[current] + thisNeighbor.Item2;
