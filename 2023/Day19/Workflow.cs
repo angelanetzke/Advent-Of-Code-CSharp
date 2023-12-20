@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Text.RegularExpressions;
 
 namespace Day19;
@@ -23,7 +24,7 @@ internal class Workflow
 	{
 		PartRange startRange = new ();
 		List<PartRange> result = [];
-		workflowList["in"].GetAppectableRules(startRange, result);
+		workflowList["in"].GetAcceptableRules(startRange, result);
 		long count = 0;
 		foreach (PartRange thisRange in result)
 		{
@@ -64,16 +65,18 @@ internal class Workflow
 			{
 				return false;
 			}
-			if (!rules[i].Contains('<') && !rules[i].Contains('>'))
+			if (!rules[i].Contains(':'))
 			{
 				return workflowList[rules[i]].IsAccepted(partString);
 			}
-			string[] ruleTokens = rules[i].Split(':');
-			char category = ruleTokens[0][0];
-			string regex = category + @"=(\d+)";
-			int partValue = int.Parse(Regex.Match(partString, regex).Groups[1].Value);
-			char comparison = ruleTokens[0][1];
-			int ruleValue = int.Parse(ruleTokens[0][2..]);
+			char category = rules[i][0];
+			int partValue = int.Parse(Regex.Match(partString, category + @"=(\d+)").Groups[1].Value);
+			Match match
+				= Regex.Match(rules[i], category 
+				+ @"(?<comparison>[\<\>]{1})(?<ruleValue>\d+):(?<nextWorkflow>.+)");
+			char comparison = match.Groups["comparison"].Value[0];
+			int ruleValue = int.Parse(match.Groups["ruleValue"].Value);
+			string nextWorkflow = match.Groups["nextWorkflow"].Value;
 			bool isRuleMatch;
 			if (comparison == '<')
 			{
@@ -85,24 +88,24 @@ internal class Workflow
 			}
 			if (isRuleMatch)
 			{
-				if (ruleTokens[1] == "A")
+				if (nextWorkflow == "A")
 				{
 					return true;
 				}
-				else if (ruleTokens[1] == "R")
+				else if (nextWorkflow == "R")
 				{
 					return false;
 				}
 				else
 				{
-					return workflowList[ruleTokens[1]].IsAccepted(partString);
+					return workflowList[nextWorkflow].IsAccepted(partString);
 				}
 			}
 		}
 		return false;
 	}
 
-	private void GetAppectableRules(PartRange currentRange, List<PartRange> acceptableList)
+	private void GetAcceptableRules(PartRange currentRange, List<PartRange> acceptableList)
 	{
 		for (int i = 0; i < rules.Length; i++)
 		{
@@ -115,33 +118,34 @@ internal class Workflow
 			{
 				return;
 			}
-			if (!rules[i].Contains('<') && !rules[i].Contains('>'))
+			if (!rules[i].Contains(':'))
 			{
-				workflowList[rules[i]]
-						.GetAppectableRules(currentRange, acceptableList);
+				workflowList[rules[i]].GetAcceptableRules(currentRange, acceptableList);
 				return;
 			}
-			string[] ruleTokens = rules[i].Split(':');
-			char category = ruleTokens[0][0];
-			string regex = category + @"=(\d+)";
-			char comparison = ruleTokens[0][1];
-			int ruleValue = int.Parse(ruleTokens[0][2..]);
+			char category = rules[i][0];
+			Match match
+				= Regex.Match(rules[i], category 
+				+ @"(?<comparison>[\<\>]{1})(?<ruleValue>\d+):(?<nextWorkflow>.+)");
+			char comparison = match.Groups["comparison"].Value[0];
+			int ruleValue = int.Parse(match.Groups["ruleValue"].Value);
+			string nextWorkflow = match.Groups["nextWorkflow"].Value;
 			(int, int) categoryRange = currentRange.ranges[category];
 			if (comparison == '<')
 			{
 				if (categoryRange.Item2 < ruleValue)
 				{
-					if (ruleTokens[1] == "A")
+					if (nextWorkflow == "A")
 					{
 						acceptableList.Add(currentRange);
 						return;
 					}
-					if (ruleTokens[1] == "R")
+					if (nextWorkflow == "R")
 					{
 						return;
 					}
-					workflowList[ruleTokens[1]]
-						.GetAppectableRules(currentRange, acceptableList);
+					workflowList[nextWorkflow].GetAcceptableRules(currentRange, acceptableList);
+					return;
 				}
 				else if (categoryRange.Item1 < ruleValue && ruleValue <= categoryRange.Item2)
 				{
@@ -149,14 +153,13 @@ internal class Workflow
 					lowerRange.ranges[category] = (categoryRange.Item1, ruleValue - 1);
 					PartRange upperRange = new (currentRange);
 					upperRange.ranges[category] = (ruleValue, categoryRange.Item2);
-					if (ruleTokens[1] == "A")
+					if (nextWorkflow == "A")
 					{
 						acceptableList.Add(lowerRange);
 					}
-					else if (ruleTokens[1] != "R")
+					else if (nextWorkflow != "R")
 					{
-						workflowList[ruleTokens[1]]
-							.GetAppectableRules(lowerRange, acceptableList);
+						workflowList[nextWorkflow].GetAcceptableRules(lowerRange, acceptableList);
 					}					
 					currentRange = upperRange;
 				}
@@ -165,17 +168,17 @@ internal class Workflow
 			{
 				if (categoryRange.Item1 > ruleValue)
 				{
-					if (ruleTokens[1] == "A")
+					if (nextWorkflow == "A")
 					{
 						acceptableList.Add(currentRange);
 						return;
 					}
-					if (ruleTokens[1] == "R")
+					if (nextWorkflow == "R")
 					{
 						return;
 					}
-					workflowList[ruleTokens[1]]
-						.GetAppectableRules(currentRange, acceptableList);
+					workflowList[nextWorkflow].GetAcceptableRules(currentRange, acceptableList);
+					return;
 				}
 				else if (categoryRange.Item1 <= ruleValue && ruleValue < categoryRange.Item2)
 				{
@@ -183,14 +186,14 @@ internal class Workflow
 					lowerRange.ranges[category] = (categoryRange.Item1, ruleValue);
 					PartRange upperRange = new (currentRange);
 					upperRange.ranges[category] = (ruleValue + 1, categoryRange.Item2);
-					if (ruleTokens[1] == "A")
+					if (nextWorkflow == "A")
 					{
 						acceptableList.Add(upperRange);
 					}
-					else if (ruleTokens[1] != "R")
+					else if (nextWorkflow != "R")
 					{
-						workflowList[ruleTokens[1]]
-							.GetAppectableRules(upperRange, acceptableList);
+						workflowList[nextWorkflow]
+							.GetAcceptableRules(upperRange, acceptableList);
 					}					
 					currentRange = lowerRange;
 				}
