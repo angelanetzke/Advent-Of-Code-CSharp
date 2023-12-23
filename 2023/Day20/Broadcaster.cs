@@ -31,4 +31,7 @@ internal class Broadcaster : IModule
 	{
 		return name;
 	}
+
+	public void Reset()
+	{}
 }

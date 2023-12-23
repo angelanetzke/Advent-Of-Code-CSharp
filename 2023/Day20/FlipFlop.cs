@@ -37,4 +37,9 @@ internal class FlipFlop : IModule
 	{
 		return name;
 	}
+
+	public void Reset()
+	{
+		isOn = false;
+	}
 }

@@ -45,4 +45,12 @@ internal class Conjunction : IModule
 		return name;
 	}
 
+	public void Reset()
+	{
+		foreach (string thisInputName in memory.Keys)
+		{
+			memory[thisInputName] = false;
+		}
+	}
+
 }
