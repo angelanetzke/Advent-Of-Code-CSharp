@@ -5,7 +5,7 @@ Theses are my C# solutions for [Advent of Code](https://adventofcode.com/), an a
 2016  
 Started: August 2023  
 IDE: VS Code  
-.Net Version: 7.0  
+.Net Version: 7.0 (Day 1 - 10) 8.0 (Day 11 and following)
 
 2017  
 Started: July 2023  
