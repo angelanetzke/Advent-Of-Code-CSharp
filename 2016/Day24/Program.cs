@@ -1,6 +1,4 @@
-﻿Console.WriteLine("Hello, World!");
-
-string[] allLines = File.ReadAllLines("input.txt");
+﻿string[] allLines = File.ReadAllLines("input.txt");
 (int, int) result = Part1AndPart2(allLines);
 Console.WriteLine($"Part 1: {result.Item1}");
 Console.WriteLine($"Part 2: {result.Item2}");
