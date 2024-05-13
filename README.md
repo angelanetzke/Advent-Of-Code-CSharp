@@ -2,6 +2,11 @@
 
 Theses are my C# solutions for [Advent of Code](https://adventofcode.com/), an annual set of programming challenges. I previously had separate repos for each year of Advent of Code. This repo is a merger of those repos.
 
+2015
+Started: May 2024
+IDE: VS Code
+.Net Version: 8.0
+
 2016  
 Started: August 2023  
 IDE: VS Code  
