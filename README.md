@@ -34,8 +34,8 @@ IDE: Visual Studio
 
 2021  
 Started: December 2021  
-IDE: Visual Studio  
-.Net Version: 5.0  
+IDE: Visual Studio (Day 1 -22) VS Code (Day 23 and following)  
+.Net Version: 5.0 (Day 1 -22) 8.0 (Day 23 and following)  
 
 2022  
 Started: December 2022  
