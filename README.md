@@ -47,8 +47,8 @@ Started: December 2023
 IDE: VS Code  
 .Net version: 8.0  
 
-2024
-Started: December 2024
-IDE: VS Code
-.Net version: 8.0
+2024  
+Started: December 2024  
+IDE: VS Code  
+.Net version: 8.0  
 
