@@ -11,6 +11,7 @@ internal class LabMap(string[] data)
 		['W'] = 'N'
 	};
 	private readonly HashSet<(char, int, int)> cache = [];
+	private static readonly HashSet<(int, int)> visited = [];
 
 	public long Part1()
 	{
@@ -20,19 +21,20 @@ internal class LabMap(string[] data)
 
 	public long Part2()
 	{
-		long count = 0;
-		for (int row = 0; row < data.Length; row++)
+		if (visited.Count == 0)
 		{
-			for (int column = 0; column < data[0].Length; column++)
+			Part1();
+		}
+		long count = 0;
+		foreach ((int, int) thisVisited in visited)
+		{
+			if (data[thisVisited.Item1][thisVisited.Item2] == '^')
 			{
-				if (data[row][column] != '.')
-				{
-					continue;
-				}
-				if (!Execute(row, column, out long _))
-				{
-					count++;
-				}
+				continue;
+			}
+			if (!Execute(thisVisited.Item1, thisVisited.Item2, out long _))
+			{
+				count++;
 			}
 		}
 		return count;
@@ -42,30 +44,25 @@ internal class LabMap(string[] data)
 	{
 		cache.Clear();
 		visitedCount = -1L;
-		if (obstacleRow >= 0 && obstacleColumn >= 0)
-		{
-			data[obstacleRow] = data[obstacleRow][..obstacleColumn] + '#' + data[obstacleRow][(obstacleColumn + 1)..];
-		}
 		var location = data
 			.Select((line, rowIndex) => new { Row = rowIndex, Column = line.IndexOf('^') })
 			.FirstOrDefault(x => x.Column != -1);
 		int row = location!.Row;
 		int column = location!.Column;
 		char direction = 'N';
-		HashSet<(int, int)> visited = [];
 		char? nextChar = '.';
+		bool isObstaclePlaced = obstacleRow >= 0 && obstacleColumn >= 0;
 		while (nextChar != null)
 		{
-			visited.Add((row, column));
+			if (!isObstaclePlaced)
+			{
+				visited.Add((row, column));
+			}			
 			if (!cache.Add((direction, row, column)))
 			{
-				if (obstacleRow >= 0 && obstacleColumn >= 0)
-				{
-					data[obstacleRow] = data[obstacleRow][..obstacleColumn] + '.' + data[obstacleRow][(obstacleColumn + 1)..];
-				}
 				return false;
 			}
-			nextChar = GetNext(direction, row, column);
+			nextChar = GetNextChar(direction, row, column, obstacleRow, obstacleColumn);
 			if (nextChar != null)
 			{
 				if (nextChar == '#')
@@ -79,33 +76,41 @@ internal class LabMap(string[] data)
 			}
 		}
 		visitedCount = visited.Count;
-		if (obstacleRow >= 0 && obstacleColumn >= 0)
-		{
-			data[obstacleRow] = data[obstacleRow][..obstacleColumn] + '.' + data[obstacleRow][(obstacleColumn + 1)..];
-		}
 		return true;
 	}
 
-	private char? GetNext(char direction, int row, int column)
+	private char? GetNextChar(char direction, int row, int column, int obstacleRow, int obstacleColumn)
 	{
-		int nextRow;
-		int nextColumn;
+		int nextRow = -1;
+		int nextColumn = -1;
 		switch(direction)
 		{		
 			case 'N':
 				nextRow = row - 1;
-				return nextRow >= 0 ? data[nextRow][column] : null;
+				nextColumn = column;
+				break;
 			case 'E':
+				nextRow = row;
 				nextColumn = column + 1;
-				return nextColumn < data[0].Length ? data[row][nextColumn] : null;
+				break;
 			case 'S':
 				nextRow = row + 1;
-				return nextRow < data.Length ? data[nextRow][column] : null;
+				nextColumn = column;
+				break;
 			case 'W':
+				nextRow = row;
 				nextColumn = column - 1;
-				return nextColumn >= 0 ? data[row][nextColumn] : null;
+				break;
 		}
-		return null;
+		if (nextRow == obstacleRow && nextColumn == obstacleColumn)
+		{
+			return '#';
+		}
+		if (nextRow < 0 || nextRow >= data.Length || nextColumn < 0 || nextColumn >= data[0].Length)
+		{
+			return null;
+		}
+		return data[nextRow][nextColumn];
 	}
 
 	private static void Advance(char direction, int row, int column, out int nextRow, out int nextColumn)
