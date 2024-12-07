@@ -4,8 +4,6 @@ internal class Equation
 {
 	private readonly long[] numbers;
 	private readonly long total;
-	private readonly Dictionary<string, long> resultCache = [];
-	private static readonly char[] operatorOrder = ['+', '*', '|'];
 
 	public Equation(string data)
 	{
@@ -16,119 +14,53 @@ internal class Equation
 
 	public long Part1()
 	{
-		char[] operators = Enumerable.Repeat('+', numbers.Length - 1).ToArray();
-		bool isSuccessful = true;
-		while (isSuccessful)
+		if (Evaluate(numbers[0], 1, true) == total)
 		{
-			long result = Evaluate(numbers.Length - 1, operators);
-			if (result == total)
-			{
-				return total;
-			}
-			isSuccessful = IncrementOperators(operators);
+			return total;
 		}
 		return 0L;
 	}
 
 	public long Part2()
 	{
-		char[] operators = Enumerable.Repeat('+', numbers.Length - 1).ToArray();
-		bool isSuccessful = true;
-		while (isSuccessful)
+		if (Evaluate(numbers[0], 1, false) == total)
 		{
-			if (operators[^1] == '*' && total % numbers[^1] != 0)
-			{
-				isSuccessful = IncrementOperators2(operators);
-				continue;
-			}
-			if (operators[^1] == '|' && total % 10 != numbers[^1] % 10)
-			{
-				isSuccessful = IncrementOperators2(operators);
-				continue;
-			}
-			long result = Evaluate(numbers.Length - 1, operators);
-			if (result == total)
-			{
-				return total;
-			}
-			isSuccessful = IncrementOperators2(operators);
+			return total;
 		}
 		return 0L;
 	}
 
-	private static bool IncrementOperators(char[] operators)
+	private long Evaluate(long runningTotal, int index, bool isPart1)
 	{
-		int carry = 1;
-		int index = operators.Length - 1;
-		while (carry == 1 && index >= 0)
+		if (index == numbers.Length - 1)
 		{
-			carry = 0;
-			operators[index] = operators[index] == '+' ? '*' : '+';
-			if (operators[index] == '+')
+			if (runningTotal + numbers[index] == total)
 			{
-				carry = 1;
-				index--;
-			}		
-		}
-		return carry == 0;
-	}
-
-	private static bool IncrementOperators2(char[] operators)
-	{
-		int carry = 1;
-		int index = operators.Length - 1;
-		while (carry == 1 && index >= 0)
-		{
-			carry = 0;
-			int currentOperator = Array.IndexOf(operatorOrder, operators[index]);
-			operators[index] = operatorOrder[(currentOperator + 1) % operatorOrder.Length];
-			if (operators[index] == '+')
-			{
-				carry = 1;
-				index--;
-			}		
-		}
-		return carry == 0;
-	}
-
-	private long Evaluate(int index, char[] operators)
-	{
-		string cacheKey = string.Join("", operators.Where((_, i) => i < index));
-		if (resultCache.TryGetValue(cacheKey, out long cachedResult))
-		{
-			return cachedResult;
-		}
-		if (index == 0)
-		{
-			return numbers[0];
-		}
-		else
-		{
-			long previous = Evaluate(index - 1, operators);
-			if (previous > total || previous == -1L)
-			{
-				resultCache[cacheKey] = -1L;
-				return -1L;
+				return total;
 			}
-			if (operators[index - 1] == '+')
+			if (runningTotal * numbers[index] == total)
 			{
-				long result = previous + numbers[index];
-				resultCache[cacheKey] = result;
-				return result;
+				return total;
 			}
-			else if (operators[index - 1] == '*')
+			if (!isPart1 && ConcatNumbers(runningTotal, numbers[index]) == total)
 			{
-				long result = previous * numbers[index];
-				resultCache[cacheKey] = result;
-				return result;
+				return total;
 			}
-			else
-			{				
-				long result = ConcatNumbers(previous, numbers[index]);
-				resultCache[cacheKey] = result;
-				return result;
-			}
+			return -1L;
 		}
+		if (Evaluate(runningTotal + numbers[index], index + 1, isPart1) == total)
+		{
+			return total;
+		}
+		if (Evaluate(runningTotal * numbers[index], index + 1, isPart1) == total)
+		{
+			return total;
+		}
+		if (!isPart1 && Evaluate(ConcatNumbers(runningTotal, numbers[index]), index + 1, isPart1) == total)
+		{
+			return total;
+		}
+		return -1L;
 	}
 
 	private static long ConcatNumbers(long l1, long l2)
