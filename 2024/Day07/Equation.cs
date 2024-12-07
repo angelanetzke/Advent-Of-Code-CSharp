@@ -32,10 +32,6 @@ internal class Equation
 
 	public long Part2()
 	{
-		if (total < numbers.Sum())
-		{
-			return 0L;
-		}
 		char[] operators = Enumerable.Repeat('+', numbers.Length - 1).ToArray();
 		bool isSuccessful = true;
 		while (isSuccessful)
