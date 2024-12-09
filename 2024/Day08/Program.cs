@@ -95,12 +95,15 @@ static void Part2(string[] allLines, out long result)
 				int antinodeColumn = antennaeAtThisFrequency[i].Item3;
 				int rowDelta = antennaeAtThisFrequency[j].Item2 - antennaeAtThisFrequency[i].Item2;
 				int columnDelta = antennaeAtThisFrequency[j].Item3 - antennaeAtThisFrequency[i].Item3;		
-				while (0 <= antinodeRow - rowDelta && antinodeRow - rowDelta < allLines.Length
-					&& 0 <= antinodeColumn - columnDelta && antinodeColumn - columnDelta < allLines[0].Length)
+				while (0 <= antinodeRow && antinodeRow < allLines.Length
+					&& 0 <= antinodeColumn && antinodeColumn < allLines[0].Length)
 				{
+					antinodes.Add((antinodeRow, antinodeColumn));	
 					antinodeRow -= rowDelta;
 					antinodeColumn -= columnDelta;	
 				}
+				antinodeRow = antennaeAtThisFrequency[j].Item2;
+				antinodeColumn = antennaeAtThisFrequency[j].Item3;
 				while (0 <= antinodeRow && antinodeRow < allLines.Length
 					&& 0 <= antinodeColumn && antinodeColumn < allLines[0].Length)
 				{
