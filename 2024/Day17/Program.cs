@@ -23,8 +23,8 @@ static void Part2(string[] allLines, out long result)
 {
 	Stopwatch timer = new ();
 	timer.Start();
-
-	result = -1L;
+	Computer c = new (allLines);
+	result = c.FindRegisterA();
 	timer.Stop();
 	Console.WriteLine(timer.Elapsed);
 }

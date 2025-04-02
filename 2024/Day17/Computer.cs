@@ -5,18 +5,19 @@ internal class Computer(string[] data)
 	private long registerA = long.Parse(data[0].Split(": ")[1]);
 	private long registerB = long.Parse(data[1].Split(": ")[1]);
 	private long registerC = long.Parse(data[2].Split(": ")[1]);
-	private readonly int[] instructions = data[4][9..].Split(",").Select(x => int.Parse(x)).ToArray();
+	private readonly int[] instructions = [..data[4][9..].Split(",").Select(x => int.Parse(x))];
 	private readonly List<long> output = [];
 
 	public void Execute()
 	{
+		output.Clear();
 		int ip = 0;
 		while (0 <= ip && ip < instructions.Length)
 		{
 			switch(instructions[ip])
 			{
 				case 0:
-					registerA = (long)(registerA / Math.Round(Math.Pow(2, GetComboValue(ip + 1))));
+					registerA /= LongPower(2, GetComboValue(ip + 1));
 					ip += 2;
 					break;
 				case 1:
@@ -46,11 +47,11 @@ internal class Computer(string[] data)
 					ip += 2;
 					break;
 				case 6:
-					registerB = (long)(registerA / Math.Round(Math.Pow(2, GetComboValue(ip + 1))));
+					registerB = registerA / LongPower(2, GetComboValue(ip + 1));
 					ip += 2;
 					break;
 				case 7:
-					registerC = (long)(registerA / Math.Round(Math.Pow(2, GetComboValue(ip + 1))));
+					registerC = registerA / LongPower(2, GetComboValue(ip + 1));
 					ip += 2;
 					break;
 			}
@@ -78,4 +79,59 @@ internal class Computer(string[] data)
 	{
 		return string.Join(",", output);
 	}
+
+	public void SetRegisterA(long newValue)
+	{
+		registerA = newValue;
+		registerB = 0L;
+		registerC = 0L;
+	}
+
+	public long FindRegisterA()
+	{
+		long testRegisterA = 0L;
+		bool isComplete = false;
+		while (!isComplete)
+		{
+			SetRegisterA(testRegisterA);
+			Execute();
+			bool isPartialMatch = true;
+			for (int i = 0; i < output.Count; i++)
+			{
+				if (output[i] != instructions[instructions.Length - output.Count + i])
+				{
+					isPartialMatch = false;
+					break;
+				}
+			}
+			if (isPartialMatch)
+			{
+				if (output.Count == instructions.Length)
+				{
+					isComplete = true;
+					
+				}
+				else
+				{
+					testRegisterA *= 8;
+				}				
+			}
+			else
+			{
+				testRegisterA++;
+			}
+		}		
+		return testRegisterA;
+	}
+
+	private static long LongPower(long x, long y)
+	{
+		long result = 1L;
+		for (int i = 1; i <= y; i++)
+		{
+			result *= x;
+		}
+		return result;
+	}
+
 }
