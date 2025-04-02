@@ -1,6 +1,6 @@
 # Advent Of Code (C#)
 
-Theses are my C# solutions for [Advent of Code](https://adventofcode.com/), an annual set of programming challenges. I previously had separate repos for each year of Advent of Code. This repo is a merger of those repos.
+Theses are my C# solutions for [Advent of Code](https://adventofcode.com/), an annual set of programming challenges. I previously had separate repos for each year of Advent of Code. This repo inlcudes a merger of those repos.
 
 2015  
 Started: May 2024  
