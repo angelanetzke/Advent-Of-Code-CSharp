@@ -3,10 +3,11 @@ namespace  Day20;
 internal class Track
 {
 	private readonly (int, int) start;
-	private readonly HashSet<(int, int)> traversible = [];
+	private readonly List<(int, int)> traversible = [];
 	private readonly List<(int, int)> walls = [];
 	private static readonly (int, int)[] deltas = [(0, 1), (0, -1), (1, 0), (-1, 0)];
 	private readonly Dictionary<(int, int), int> distances = [];
+	private static readonly int targetImprovement = 100;
 
 	public Track(string[] allLines)
 	{
@@ -37,12 +38,23 @@ internal class Track
 
 	public int Part1()
 	{
-		int count = 0;
-		int targetImprovement = 100;
+		int count = 0;		
 		SetDistances();
 		foreach ((int, int) thisCheatWall in walls)
 		{
 			count += GetImprovement(thisCheatWall) >= targetImprovement ? 1 : 0;
+		}
+		return count;
+	}
+
+	public int Part2()
+	{
+		int count = 0;
+		int cheatLength = 20;
+		SetDistances();	
+		foreach ((int, int) thisTraversible in traversible)
+		{
+			count += GetCheats(thisTraversible, cheatLength).Count(x => x >= targetImprovement);
 		}
 		return count;
 	}
@@ -83,5 +95,25 @@ internal class Track
 			return Math.Abs(upDistance - downDistance) - 1;
 		}
 		return 0;
+	}
+
+	private List<int> GetCheats((int, int) cheatStart, int cheatLength)
+	{
+		List<int> result = [];
+		List<(int, int)> inRange = [..traversible
+			.Where(x => GetManhattanDistance(cheatStart, x) <= cheatLength)];
+		foreach ((int, int) thisSpace in inRange)
+		{
+			if (distances.TryGetValue(thisSpace, out int endDistance))
+			{
+				result.Add(endDistance - distances[cheatStart] - (GetManhattanDistance(thisSpace, cheatStart) - 1));
+			}
+		}
+		return result;
+	}
+
+	private static int GetManhattanDistance((int, int) space1, (int, int) space2)
+	{
+		return Math.Abs(space1.Item1 - space2.Item1) + Math.Abs(space1.Item2 - space2.Item2);
 	}
 }

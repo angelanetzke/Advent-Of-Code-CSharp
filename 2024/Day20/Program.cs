@@ -22,8 +22,8 @@ static void Part2(string[] allLines, out long result)
 {
 	Stopwatch timer = new ();
 	timer.Start();
-
-	result = -1L;
+	Track t = new (allLines);
+	result = t.Part2();
 	timer.Stop();
 	Console.WriteLine(timer.Elapsed);
 }
