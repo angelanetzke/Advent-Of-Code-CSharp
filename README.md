@@ -25,7 +25,7 @@ IDE: VS Code
 2019  
 Started: November 2022  
 IDE: Visual Studio (Day 1 - 13) VS Code (Day 14 and following)  
-.Net version: 6.0  
+.Net version: 6.0 (Day 1 - 20) 9.0 (Day 21 and following)  
 
 2020  
 Started: July 2022 (rewrite of Java code started in December 2020)  
