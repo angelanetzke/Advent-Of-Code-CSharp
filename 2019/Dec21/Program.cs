@@ -44,7 +44,6 @@ static long RunProgram(string programName, string[] allLines)
 	c.Run();
 	List<long> output = c.GetOutput();
 	Console.WriteLine($"output count: {output.Count}");
-	result = -1L;
 	foreach (long thisOutputValue in output)
 	{
 		if (thisOutputValue >= 256)
