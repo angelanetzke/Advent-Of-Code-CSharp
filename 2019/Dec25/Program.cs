@@ -13,81 +13,55 @@ static void Part1(string[] allLines, out long result)
 	IntcodeComputer ic = new();
 	ic.SetMemory(allLines[0]);
 	List<string> itemList = [];
-	string? input = "";
-	while (input != "exit")
+	string[] commands = File.ReadAllLines("commands.txt");
+	foreach (string thisCommand in commands)
 	{
-		ic.Run();
-		List<long> output = ic.GetOutput();
-		foreach (long thisChar in output)
+		ic.AddInput(thisCommand);
+		if (thisCommand.StartsWith("take"))
 		{
-			Console.Write((char)thisChar);
-		}
-		Console.WriteLine();
-		ic.ClearOutput();
-		input = Console.ReadLine();
-		if (input != null && input != "exit")
-		{
-			if (input.StartsWith("take"))
-			{
-				itemList.Add(input[5..]);
-			}
-			if (input == "inv")
-			{
-				Console.WriteLine(string.Join(", ", itemList));
-			}
-			foreach (char c in input)
-			{
-				ic.AddInput(c);
-			}
-			ic.AddInput(10);
+			itemList.Add(thisCommand[5..]);
 		}		
 	}
-	List<long> dropItems = DropItems(itemList);
-	List<long> takeItems;
-	foreach (long c in dropItems)
+	ic.Run();
+	foreach (string thisItem in itemList)
 	{
-		ic.AddInput(c);
+		ic.AddInput($"drop {thisItem}");
 	}
+	ic.Run();
 	List<List<string>> allCombinations = GetCombinations(itemList);
-	input = "1";
+	bool isComplete = false;
 	foreach (List<string> thisCombination in allCombinations)
 	{
-		Console.WriteLine($"this combination: {string.Join(", ", thisCombination)}");
-		takeItems = TakeItems(thisCombination);
-		foreach (long c in takeItems)
+		foreach (string thisItem in thisCombination)
 		{
-			ic.AddInput(c);
+			ic.AddInput($"take {thisItem}");
 		}
-		foreach (char c in "inv")
-		{
-			ic.AddInput(c);
-		}
-		ic.AddInput(10);
-		foreach (char c in "east")
-		{
-			ic.AddInput(c);
-		}
-		ic.AddInput(10);
+		ic.Run();
+		ic.ClearOutput();
+		ic.AddInput("inv");
+		ic.AddInput("east");
 		ic.Run();
 		List<long> output = ic.GetOutput();
-		foreach (long thisChar in output)
+		foreach (long thisOutputChar in output)
 		{
-			Console.Write((char)thisChar);
-		}
-		Console.WriteLine();
-		ic.ClearOutput();
-		input = Console.ReadLine();
-		if (input == "1")
-		{
-			dropItems = DropItems(thisCombination);
-			foreach (long c in dropItems)
+			if ('0' <= thisOutputChar && thisOutputChar <= '9')
 			{
-				ic.AddInput(c);
+				isComplete = true;
+				break;
 			}
-		}		
-		if (input != "1")
+		}
+		if (isComplete)
 		{
+			foreach (long thisOutputChar in output)
+			{
+				Console.Write((char)thisOutputChar);
+			}
+			Console.WriteLine();
 			break;
+		}
+		foreach (string thisItem in thisCombination)
+		{
+			ic.AddInput($"drop {thisItem}");
 		}
 	}
 	result = -1L;
@@ -99,58 +73,21 @@ static List<List<string>> GetCombinations(List<string> itemList)
 {
 	List<List<string>> combinations = [];
 	int n = itemList.Count;
-	for (int i = 0; i < (1 << n); i++)
+	for (int i = 1; i < (1 << n); i++)
 	{
-		List<string> combination = [];
+		List<string> thisCombination = [];
 		for (int j = 0; j < n; j++)
 		{
 			if ((i & (1 << j)) != 0)
 			{
-				combination.Add(itemList[j]);
+				thisCombination.Add(itemList[j]);
 			}
 		}
-		if (combination.Count > 0)
-		{
-			combinations.Add(combination);
-		}		
+		combinations.Add(thisCombination);
 	}
 	return combinations;
 }
 
-static List<long> DropItems(List<string> itemList)
-{
-	List<long> result = [];
-	foreach (string thisItem in itemList)
-	{
-		foreach (char c in "drop ")
-		{
-			result.Add(c);
-		}
-		foreach (char c in thisItem)
-		{
-			result.Add(c);
-		}
-		result.Add(10);
-	}
-	return result;
-}
 
-static List<long> TakeItems(List<string> itemList)
-{
-	List<long> result = [];
-	foreach (string thisItem in itemList)
-	{
-		foreach (char c in "take ")
-		{
-			result.Add(c);
-		}
-		foreach (char c in thisItem)
-		{
-			result.Add(c);
-		}
-		result.Add(10);
-	}
-	return result;
-}
 
 

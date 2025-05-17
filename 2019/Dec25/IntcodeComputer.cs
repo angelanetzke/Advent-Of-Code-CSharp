@@ -9,6 +9,7 @@ internal class IntcodeComputer
 	private List<long> output = [];
 	private long relativeBase = 0L;
 	private bool isPaused = false;
+	
 	public void Run()
 	{
 		if (isPaused)
@@ -192,6 +193,15 @@ internal class IntcodeComputer
 	public void AddInput(long newInput)
 	{
 		input.Add(newInput);
+	}
+
+	public void AddInput(string newInput)
+	{
+		foreach (char c in newInput)
+		{
+			AddInput(c);
+		}
+		AddInput(10);
 	}
 
 	public void ClearOutput()
