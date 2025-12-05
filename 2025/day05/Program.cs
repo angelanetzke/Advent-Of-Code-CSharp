@@ -18,7 +18,7 @@ for (int j = i + 1; j < allLines.Length; j++)
 	ingredients.Add(long.Parse(allLines[j]));
 }
 Part1(ranges, ingredients);
-Part2(ranges, ingredients);
+Part2(ranges);
 
 static void Part1(List<(long, long)> ranges, List<long> ingredients)
 {
@@ -40,7 +40,7 @@ static void Part1(List<(long, long)> ranges, List<long> ingredients)
 	Console.WriteLine($"Part 1: {result} ({timer.ElapsedMilliseconds} ms)");
 }
 
-static void Part2(List<(long, long)> ranges, List<long> ingredients)
+static void Part2(List<(long, long)> ranges)
 {
 	Stopwatch timer = new();
 	timer.Start();
